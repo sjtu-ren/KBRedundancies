@@ -1,0 +1,14 @@
+/*
+!/README.md
+!/.gitignore
+!/common
+!/1-CommunityContributed
+!/2-Open-domainExtraction
+!/3-InformationExtraction
+!/4-LexicalThesaurus
+!/5-LogicBased
+
+# /common
+/common/*
+!/common/kbstat.py
+!/common/NumeratedKBFormat.md

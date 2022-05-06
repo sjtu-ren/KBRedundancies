@@ -22,7 +22,7 @@ The following types of KBs will be observed in this project:
    - Targets: **FreeBase**, **WikiData**, **MusicBrainz**
 2. Open-domain Extraction from Community Contributions:
    - KBs in this type are built by automatic extraction and integration of various community databases, such as WikiData, and are linked to the Linked Open Data (LOD) cloud.
-   - Targets: **Yago**, **DBpedia**
+   - Targets: **Yago**, **DBpedia**, **CNDBpedia**
 3. Information Extraction from Raw Text:
    - KBs in this type are extracted via NLP techniques from raw text, such as the online websites.
    - Targets: **KnowItAll**, **NELL**, **ConceptNet**
@@ -33,7 +33,20 @@ The following types of KBs will be observed in this project:
    - KBs in the type are usually represented in formal logic and are complicated. So they are optional in this project.
    - Targets: **Cyc**, **OpenCyc**
 
-**Note: The adopted version for each of the above KBs are the latest version before** **[2022/05/01](https://)**
+### 2.1 Release Versions
+
+All KB versions should be the latest release before **[2022/05/01](https://)**.
+The following releases should also be taken into account:
+
+1. Yago: latest version of 1/2s/3
+
+### 2.2 Language Versions
+
+All of the target KBs should contain the English language version. The following language versions should also be taken into account:
+
+1. WikiData: Chinese, French, Germany, Russian
+2. WordNet: Chinese, French, Germany, Russian
+3. BabelNet: Chinese, French, Germany, Russian
 
 ## 3. Methodology
 
@@ -46,12 +59,14 @@ The code for SInC is [here](https://github.com/TramsWang/SInC)
 This repos is organized as follows:
 
 ```
-┳ README.md			[]
-┣ .gitignore			[]
+┳ README.md
+┣ .gitignore
 ┣ common			[Common utilities for KB operations]
+┃ ┣ NumeratedKBFormat.md	[KB format specification]
+┃ ┗ kbstate.py			[Script for KB statistics]
 ┣ 1-CommunityContributed	[Results for type-1 KBs]
 ┣ 2-Open-domainExtraction	[Results for type-2 KBs]
-┣ 3-InfomationExtraction	[Results for type-3 KBs]
+┣ 3-InformationExtraction	[Results for type-3 KBs]
 ┣ 4-LexicalThesaurus		[Results for type-4 KBs]
 ┗ 5-LogicBased			[Results for type-5 KBs]
 ```
