@@ -1,5 +1,5 @@
 def dumpKbStatistics(kbPath):
-    '''
+    """
     Function to calculate the statistics of a given KB.
 
     Parameters:
@@ -8,7 +8,11 @@ def dumpKbStatistics(kbPath):
                     The file should be at the same path with the KB, and the name of the file
                     should be: <KB name>_statistics.xlsx
     
-    Output Excel Content: The Excel spreadsheet file should contain the following sheets:
+    Returns:
+        None
+
+    An Excel file should be written in the directory 'kbPath'.
+    The Excel spreadsheet file should contain the following sheets:
         - Overview:
             - 1st row, the title row:
                 - KB: the name of the KB
@@ -31,5 +35,5 @@ def dumpKbStatistics(kbPath):
                 - functionality: the functionality value of the relation, round to 2 decimal places
                 - symmetricity: the proportion of symmetric pairs in the relation, round to 2 decimal places
             - other rows are the statistics of each relation
-    '''
+    """
     raise Exception("Not Implemented")

@@ -17,7 +17,7 @@ A numerated KB is composed of the following parts:
    - There may be multiple numerated record files, each of which contains records in one relation.
    - The name of the files should be `<relation name>_<arity>_<#records>.rel`.
    - The files are binary files, each of which only contains `arity`x`#records` integers.
-   - The integers stored in one `.rel` file is column oriented, each column corresponds to one argument in the relation. The columns are stored in the file in order, i.e., in the order of: 1st col 1st row, 1st col 2nd row, ..., ith col jth row, ith col (j+1)th row, ...
+   - The integers stored in one `.rel` file is row oriented, each row corresponds to one record in the relation. The records are stored in the file in order, i.e., in the order of: 1st row 1st col, 1st row 2nd col, ..., ith row jth col, ith row (j+1)th col, ...
 3. Meta Info
    - There may be multiple files with extension `.meta` to store arbitrary meta information of the KB.
    - The files are customized by other utilities and are not in a fixed format.
@@ -72,15 +72,15 @@ nataly	11
 
 - `family_3_4.rel` (numbers are separated by space for demonstration, the actual files are in binary format)
 ```
-4 7 a d 5 8 b e 6 9 c f
+4 5 6 7 8 9 a b c d e f
 ```
 
 - `mother_2_4.rel`
 ```
-4 7 a d 6 9 c f
+4 6 7 9 a c d f
 ```
 
 - `father_2_4.rel`
 ```
-5 8 b e 6 9 10 11
+5 6 8 9 b c 10 11
 ```
