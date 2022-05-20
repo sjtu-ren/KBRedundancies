@@ -739,7 +739,11 @@ class NumeratedKb:
         """
         relation = self.getRelationByName(relName)
         if relation is None:
-            relation = self.createRelation(relName, arity)
+            try:
+                relation = self.createRelation(relName, len(next(iter(records))))
+            except StopIteration:
+                # If no record is in 'records', simply return
+                return
         
         arity = relation.getArity()
         for record in records:
@@ -806,7 +810,11 @@ class NumeratedKb:
         """
         relation = self.getRelationByName(relName)
         if relation is None:
-            relation = self.createRelation(relName, arity)
+            try:
+                relation = self.createRelation(relName, len(next(iter(records))))
+            except StopIteration:
+                # If no record is in 'records', simply return
+                return
         
         arity = relation.getArity()
         for record in records:

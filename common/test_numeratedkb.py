@@ -836,6 +836,13 @@ class NumeratedKbTest(unittest.TestCase):
         self.assertEqual(3, kb.totalRelations())
         self.assertEqual(20, kb.totalRecords())
 
+        kb.addNamedRecords2RelationByName("rel", [('o', 'o'), ('p', 'p')])
+        kb.addNumeratedRecords2RelationByName("rel2", [(1,), (2,)])
+
+        self.assertEqual(27, kb.getNumerationMap().totalMappings())
+        self.assertEqual(5, kb.totalRelations())
+        self.assertEqual(24, kb.totalRecords())
+
     def testRemoveRecord(self):
         kb = NumeratedKb(KB_NAME, MEM_DIR)
 
