@@ -235,10 +235,7 @@ class NumerationMapTest(unittest.TestCase):
         tmp_path = os.path.join(MEM_DIR, tmp_dir)
         os.mkdir(tmp_path)
         TMP_PATHS.append(tmp_path)
-        original_value = NumerationMap._MAX_MAP_ENTRIES
-        NumerationMap._MAX_MAP_ENTRIES = 2
-        num_map.dump(tmp_path)
-        NumerationMap._MAX_MAP_ENTRIES = original_value
+        num_map.dump(tmp_path, maxEntries=2)
         num_map2 = NumerationMap(tmp_path)
 
         self.assertEqual(num_map._numMap, num_map2._numMap)
@@ -342,6 +339,7 @@ class KbRelationTest(unittest.TestCase):
         self.assertEqual("relation", rel.getName())
         self.assertEqual(4, rel.getArity())
         self.assertEqual(0, rel.totalRecords())
+        self.assertEqual(0, rel.getNumeration())
         self.assertEqual(set(), rel.getRecordSet())
 
         rel.addRecord((1, 2 , 3, 4))

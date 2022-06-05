@@ -210,21 +210,23 @@ class NumerationMap:
         """
         return self._numMap.get(name, None)
 
-    def dump(self, kbPath: str) -> None:
+    def dump(self, kbPath: str, startMapNum: int = _MAP_FILE_NUMERATION_START, maxEntries: int = _MAX_MAP_ENTRIES) -> None:
         """
         Write the numeration map to 'kbPath'.
 
         Parameters:
-            kbPath:     The input KB path.
+            kbPath:         The input KB path.
+            startMapNum:    The start number of the map files (Default _MAP_FILE_NUMERATION_START)
+            maxEntries:     The maximum number of entries a map file contains (Default _MAX_MAP_ENTRIES)
 
         Returns:
             None
         """
-        map_num = NumerationMap._MAP_FILE_NUMERATION_START
+        map_num = startMapNum
         map_file = open(getMapFilePath(kbPath, map_num), 'w')
         records_cnt = 0
         for name, num in self._numMap.items():
-            if records_cnt >= NumerationMap._MAX_MAP_ENTRIES:
+            if records_cnt >= maxEntries:
                 map_file.close()
                 records_cnt = 0
                 map_num += 1
@@ -257,7 +259,8 @@ class KbRelation:
 
     def __init__(self, name: str, numeration: int, arity: int, records: int, kbPath: str = None, numMap: dict = None) -> None:
         """
-        Read a single relation file of the KB. If
+        Load a single relation file from the local file system. If the 'numMap' is not 'None', every loaded numeration
+        is checked for validness in the map.
 
         Parameters:
             name:       The name of the relation.
@@ -434,10 +437,13 @@ class NumeratedKb:
         Dump a KB to the file system. If the path does not exist, it will be created.
 
         Parameters:
-            basePath:     The path where the KB will be stored.
+            basePath:   The path where the KB will be stored.
 
         Returns:
             None
+
+        Raises:
+            Exception:  Directory creation error
         """
         # Check & Create dir
         kbPath = os.path.join(basePath, self._name)
@@ -494,10 +500,13 @@ class NumeratedKb:
         Raises:
             KbException:    The name 'relName' has already been used; numerations in loaded records are not mapped.
         """
-        if self._numMap.name2Num(relName) is not None:
-            raise KbException("The relation name has already been used: %s" % relName)
+        num = self._numMap.name2Num(relName)
+        if num is not None:
+            if num in self._relations:
+                raise KbException("The relation name has already been used: %s" % relName)
+        else:
+            num = self._numMap.mapName(relName)
         
-        num = self._numMap.mapName(relName)
         if check:
             # Check record numerations
             relation = KbRelation(relName, num, arity, records, relBasePath, self._numMap)
@@ -620,19 +629,13 @@ class NumeratedKb:
         if len(record) != arity:
             raise KbException("Record arity (%d) does not match the relation (%d): %s" % (len(record), arity, record))
 
-        num_record = [0] * arity
-        for i in range(arity):
-            num = self._numMap.name2Num(record[i])
-            if num is None:
-                num = self._numMap.mapName(record[i])
-            num_record[i] = num
-        
+        num_record = [self._numMap.mapName(record[i]) for i in range(arity)]
         relation.addRecord(tuple(num_record))
 
     def addNamedRecord2RelationByNumeration(self, relNum: int, record: tuple) -> None:
         """
         Add a record where arguments are name strings to the KB. The names will be converted to numerations (or 
-        be added to the mapping first) before the record is added. A KbException wil be raised If the relation
+        be added to the mapping first) before the record is added. A KbException will be raised If the relation
         does not exist in the KB.
 
         Parameters:
@@ -653,18 +656,12 @@ class NumeratedKb:
         if len(record) != arity:
             raise KbException("Record arity (%d) does not match the relation (%d): %s" % (len(record), arity, record))
 
-        num_record = [0] * arity
-        for i in range(arity):
-            num = self._numMap.name2Num(record[i])
-            if num is None:
-                num = self._numMap.mapName(record[i])
-            num_record[i] = num
-        
+        num_record = [self._numMap.mapName(record[i]) for i in range(arity)]
         relation.addRecord(tuple(num_record))
 
     def addNumeratedRecord2RelationByName(self, relName: str, record: tuple) -> None:
         """
-        Add a record where arguments are numbers to the KB. A new KbRelation wil be created If the relation does
+        Add a record where arguments are numbers to the KB. A new KbRelation will be created If the relation does
          not exist in the KB. A KbException will be raised if a number is not mapped to any string in the KB.
 
         Parameters:
@@ -685,9 +682,9 @@ class NumeratedKb:
         if len(record) != arity:
             raise KbException("Record arity (%d) does not match the relation (%d): %s" % (len(record), arity, record))
 
-        for i in range(arity):
-            if self._numMap.num2Name(record[i]) is None:
-                raise KbException("Numeration not mapped in the KB: %d" % record[i])
+        for i in record:
+            if self._numMap.num2Name(i) is None:
+                raise KbException("Numeration not mapped in the KB: %d" % i)
         
         relation.addRecord(record)
 
@@ -737,6 +734,9 @@ class NumeratedKb:
         Raises:
             - KbException:  Record arity does not match the relation.
         """
+        if 0 == len(records):
+            return
+
         relation = self.getRelationByName(relName)
         if relation is None:
             try:
@@ -860,7 +860,7 @@ class NumeratedKb:
 
     def removeNamedRecordFromRelationByName(self, relName: str, record: tuple) -> None:
         """
-        Remove a record from relation 'relName'. No exception is raised if the relation is not in the KB or the
+        Remove a record from relation 'relName'. No exception is raised if the relation is not in the KB nor the
         record is not in the relation.
 
         Parameters:
@@ -933,7 +933,7 @@ class NumeratedKb:
             record:     The record, arguments are name strings
 
         Returns:
-            bool:       True if and only if the KB has relation and the relation contains the record
+            bool:       True if and only if the KB has the relation and the relation contains the record
         """
         relation = self.getRelationByName(relName)
         if relation is not None:
