@@ -21,6 +21,7 @@ def parseYagoEntity(yagoMap: NumerationMap):
 def parseYagoRelation(yagoMap: NumerationMap):
     path = "../data/yago-1.0.0-native/facts"
     path_list = os.listdir(path)
+    indices = set()
     print(path_list)
     for dir in path_list:
         if dir == ".DS_Store":
@@ -34,8 +35,23 @@ def parseYagoRelation(yagoMap: NumerationMap):
             f = open(fpath, 'r')
             for line in f.readlines():
                 index, arg1, arg2, possibility = line.strip().split('\t')
-                yagoMap.mapName(arg1)
-                yagoMap.mapName(arg2)
+                indices.add(index)
+        for file in file_list:
+            fpath = os.path.join(dpath, file)
+            f = open(fpath, 'r')
+            for line in f.readlines():
+                index, arg1, arg2, possibility = line.strip().split('\t')
+                if arg1 in indices:
+                    if arg2 in indices:
+                        print("arg2 is index")
+                    else:
+                        yagoMap.mapName(arg2)
+                else:
+                    if arg2 in indices:
+                        yagoMap.mapName(arg1)
+                    else:
+                        yagoMap.mapName(arg1)
+                        yagoMap.mapName(arg2)
     print(yagoMap.totalMappings())
 
 
@@ -44,6 +60,7 @@ def parseYago():
     yagoMap = NumerationMap()
     parseYagoEntity(yagoMap)
     parseYagoRelation(yagoMap)
+    print("get finish!")
     yagoMap.dump(mpath)
 
 

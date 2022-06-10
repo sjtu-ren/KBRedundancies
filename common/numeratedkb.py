@@ -102,6 +102,7 @@ class NumerationMap:
         self._numMap = dict() # int -> str
         max_num = 0
         regex = re.compile("map[0-9]+.tsv$")
+        kbPath = os.path.join(kbPath, "map")
         for fname in os.listdir(kbPath):
             fpath = os.path.join(kbPath, fname)
             if os.path.isfile(fpath) and regex.match(fname):
@@ -422,6 +423,7 @@ class NumeratedKb:
         
         # Load Maps
         self._numMap = NumerationMap(kbPath)
+        kbPath = os.path.join(kbPath, "relations")
 
         # Load Relations
         for rel_file_path in glob("%s/*.rel" % kbPath):
