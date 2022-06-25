@@ -1,12 +1,15 @@
+
+"""
+    Extract map in yago1
+"""
+
+import sys
+sys.path.append("../../..")
 from common.numeratedkb import NumerationMap
 import os
 
-"""
-    yago map in memory
-"""
-
 def parseYagoEntity(yagoMap: NumerationMap):
-    path = "../data/yago-1.0.0-native/entities"
+    path = "../../data/yago1/yago-1.0.0-native/entities"
     path_list = os.listdir(path)
     for file in path_list:
         pathname = os.path.join(path, file)
@@ -19,44 +22,25 @@ def parseYagoEntity(yagoMap: NumerationMap):
 
 
 def parseYagoRelation(yagoMap: NumerationMap):
-    path = "../data/yago-1.0.0-native/facts"
+    path = "../../data/yago1/yago-1.0.0-native/facts"
     path_list = os.listdir(path)
-    indices = set()
-    print(path_list)
     for dir in path_list:
         if dir == ".DS_Store":
             continue
         yagoMap.mapName(dir)
         dpath = os.path.join(path, dir)
         file_list = os.listdir(dpath)
-        print(file_list)
         for file in file_list:
             fpath = os.path.join(dpath, file)
             f = open(fpath, 'r')
             for line in f.readlines():
                 index, arg1, arg2, possibility = line.strip().split('\t')
-                indices.add(index)
-        for file in file_list:
-            fpath = os.path.join(dpath, file)
-            f = open(fpath, 'r')
-            for line in f.readlines():
-                index, arg1, arg2, possibility = line.strip().split('\t')
-                if arg1 in indices:
-                    if arg2 in indices:
-                        print("arg2 is index")
-                    else:
-                        yagoMap.mapName(arg2)
-                else:
-                    if arg2 in indices:
-                        yagoMap.mapName(arg1)
-                    else:
-                        yagoMap.mapName(arg1)
-                        yagoMap.mapName(arg2)
+                yagoMap.mapName(arg1)
+                yagoMap.mapName(arg2)
     print(yagoMap.totalMappings())
 
-
 def parseYago():
-    mpath = "/Users/renhaotian/实验室/KBRedundancies/KBRedundancies/2-Open-domainExtraction/data/map"
+    mpath = "/sdb/sincKBs/KBRedundancies/2-Open-domainExtraction/data/yago1/map"
     yagoMap = NumerationMap()
     parseYagoEntity(yagoMap)
     parseYagoRelation(yagoMap)

@@ -1,13 +1,21 @@
+"""
+This file aims to Extract relations in yago1
+"""
+
+import sys
+sys.path.append("../../..")
 from common.numeratedkb import KbRelation
 from common.numeratedkb import NumerationMap
 import os
 
 def parseRelation():
-    mpath = "/Users/renhaotian/实验室/KBRedundancies/KBRedundancies/2-Open-domainExtraction/data/map"
-    rpath = "/Users/renhaotian/实验室/KBRedundancies/KBRedundancies/2-Open-domainExtraction/data/relations"
-    path = "../data/yago-1.0.0-native/facts"
+    mpath = "../../data/yago1"
+    rpath = "../../data/yago1/relations"
+    path = "../../data/yago1/yago-1.0.0-native/facts"
+    # indices = set()
     dir_list = os.listdir(path)
     yagoMap = NumerationMap(mpath)
+    # ExtractIndex(indices)
     global index
     for dir in dir_list:
         index = yagoMap.name2Num(dir)
