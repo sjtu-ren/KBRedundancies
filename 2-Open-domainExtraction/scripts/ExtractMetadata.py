@@ -104,7 +104,7 @@ def constructDict(relation: KbRelation, total_entity: set, o_to_s: dict, s_to_o:
         else:
             o_to_s[num] = [sub]
 
-def getMeta(name: str, path: str, indexmode: int, index: int, indexpath: str):
+def getMeta(name: str, path: str, indexmode: int, index: int, indexpath: str, dstpath: str):
     # new Excel
     excel = xlwt.Workbook(encoding='utf-8')
     # add Excel sheet2 and title info
@@ -240,7 +240,7 @@ def getMeta(name: str, path: str, indexmode: int, index: int, indexpath: str):
         total_degree = total_degree + degrees[key]
     avg_degree = total_degree / entity_num
     excelsheet.write(1, 4, avg_degree)
-    excel.save("./metadata.xls")
+    excel.save(dstpath)
 
 def isdate(datestr):
     # handle #
@@ -282,5 +282,6 @@ if __name__ == '__main__':
     parser.add_argument('--index','-i',type=int, required=True, help="0: dataset not support reified, 1: dataset support reified")
     parser.add_argument('--indexmode','-m',type=int, default=0, help="index mode:0: ~index, 1: index")
     parser.add_argument('--indexpath','-ipath',type=str, help="index/~index should be prehandled and stored in a file")
+    parser.add_argument('--dstpath','-dpath',type=str, help="file to store the result")
     args = parser.parse_args()
-    getMeta(args.name, args.path, args.indexmode, args.index, args.indexpath)
+    getMeta(args.name, args.path, args.indexmode, args.index, args.indexpath, args.dstpath)
