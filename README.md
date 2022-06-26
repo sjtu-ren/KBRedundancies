@@ -61,12 +61,13 @@ This repos is organized as follows:
 ```
 ┳ README.md
 ┣ .gitignore
-┣ common			[Common utilities for KB operations]
-┃ ┣ NumeratedKBFormat.md	[KB format specification]
-┃ ┗ kbstate.py			[Script for KB statistics]
-┣ 1-CommunityContributed	[Results for type-1 KBs]
-┣ 2-Open-domainExtraction	[Results for type-2 KBs]
-┣ 3-InformationExtraction	[Results for type-3 KBs]
-┣ 4-LexicalThesaurus		[Results for type-4 KBs]
-┗ 5-LogicBased			[Results for type-5 KBs]
+┣ common                    [Common utilities for KB operations]
+┃ ┣ NumeratedKBFormat.md   [KB format specification]
+┃ ┣ numeratedkb.py         [KB Operation Tools]
+┃ ┗ kbstate.py             [Script for KB statistics]
+┣ 1-CommunityContributed    [Results for type-1 KBs]
+┣ 2-Open-domainExtraction   [Results for type-2 KBs]
+┣ 3-InformationExtraction   [Results for type-3 KBs]
+┣ 4-LexicalThesaurus        [Results for type-4 KBs]
+┗ 5-LogicBased              [Results for type-5 KBs]
 ```
