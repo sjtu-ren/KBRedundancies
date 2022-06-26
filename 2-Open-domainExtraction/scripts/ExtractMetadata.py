@@ -1,16 +1,18 @@
 import sys
-sys.path.append("../../..")
+sys.path.append("../..")
 # from common.numeratedkb import NumeratedKb
 from common.numeratedkb import NumerationMap
-from ExtractNotIndex import ExtractIntegers
+from yago1.ExtractNotIndex import ExtractIntegers, ExtractIntegersFromFile
 from common.numeratedkb import parseRelFilePath
 from common.numeratedkb import KbRelation
 from time import strptime
 from time import sleep
 import xlwt
 import psutil
+import argparse
 import os
 import gc
+from glob import glob
 
 # TODO: different kb may use different method to store type information
 def getTypes(types : set, relation : KbRelation):
@@ -32,7 +34,7 @@ def updateDegree(degrees : dict, relation : KbRelation):
             else:
                 degrees[num] = 1
 
-def checkProperty(relation : KbRelation, integers : set, types : set, map: NumerationMap) -> bool:
+def checkProperty(relation : KbRelation, integers : set, types : set, map: NumerationMap, index: int) -> bool:
     property = False
     for record in relation.getRecordSet():
         pos = 1
@@ -48,14 +50,18 @@ def checkProperty(relation : KbRelation, integers : set, types : set, map: Numer
                 is_date = isdate(object)
                 # check if is int
                 if(isdigit(object)):
-                    if object not in integers:
-                        continue
+                    if index == 1:
+                        if object not in integers:
+                            continue
+                        else:
+                            is_int = True
                     else:
                         is_int = True
                 if object in types:
                     is_type = True
         if(is_date or is_int or is_type ):
             property = True
+        #TODO: only check the first record, may be wrong
         break
     return property
 
@@ -98,7 +104,7 @@ def constructDict(relation: KbRelation, total_entity: set, o_to_s: dict, s_to_o:
         else:
             o_to_s[num] = [sub]
 
-def getMeta():
+def getMeta(name: str, path: str, indexmode: int, index: int, indexpath: str):
     # new Excel
     excel = xlwt.Workbook(encoding='utf-8')
     # add Excel sheet2 and title info
@@ -114,52 +120,58 @@ def getMeta():
     excelsheet.write(0, 8, "objects")
     excelsheet.write(0, 9, "functionality")
     excelsheet.write(0, 10, "symmetricity")
-    map = NumerationMap("../../data/yago1")
+    print(path)
+    map = NumerationMap(path)
     mem = psutil.virtual_memory()
     used = mem.free / 1024 / 1024 / 1024
     print("free mem after extract map", used)
     degrees = dict()
 
     # get relation num
-    relation_list = os.listdir("../../data/yago1/relations")
+    relation_list = list()
+    for rel_file_path in glob("%s/*.rel" % path):
+        relation_list.append(rel_file_path)
     relation_num = len(relation_list)
 
     # get entity num
     entity_num = map.totalMappings() - relation_num
+
+    # Extract indices
     integers = set()
-    ExtractIntegers(integers)
-    mem = psutil.virtual_memory()
-    used = mem.free / 1024 / 1024 / 1024
-    print("free mem after extract index", used)
+    if index == 1:
+        ExtractIntegersFromFile(integers, indexpath)
+        mem = psutil.virtual_memory()
+        used = mem.free / 1024 / 1024 / 1024
+        print("free mem after extract index", used)
 
     # index is not included
-    print(entity_num)
-    for key in map._numMap:
-        if isdigit(key) and key not in integers:
-            entity_num = entity_num - 1
-    print(entity_num)
-    
+    # TODO: indices may be a special character in yago1, other kb may need another method
+    if index == 1:
+        print(entity_num)
+        for key in map._numMap:
+            if isdigit(key) and key not in integers:
+                entity_num = entity_num - 1
+        print(entity_num)
+
     # extract relation metadata
     row = 0
-    relation_list = os.listdir("../../data/yago1/relations")
     total_records = 0
     types = set()
-    for name in relation_list:
-        relation_path = os.path.join("../../data/yago1/relations", name)
+    for relation_path in relation_list:
         rel_name, arity, record_cnt = parseRelFilePath(relation_path)
         num = map.name2Num(rel_name)
         total_records = total_records + record_cnt
         if rel_name == "type":
-            relation = KbRelation(rel_name, num, arity, record_cnt, "../../data/yago1/relations")
+            relation = KbRelation(rel_name, num, arity, record_cnt, path)
             getTypes(types, relation)
-    for name in relation_list:
+    for relation_path in relation_list:
         mem = psutil.virtual_memory()
         used = mem.free / 1024 / 1024 / 1024
         print("free mem before begin", used)
-        relation_path = os.path.join("../../data/yago1/relations", name)
         rel_name, arity, record_cnt = parseRelFilePath(relation_path)
         num = map.name2Num(rel_name)
-        relation = KbRelation(rel_name, num, arity, record_cnt, "../../data/yago1/relations")
+        relation = KbRelation(rel_name, num, arity, record_cnt, path)
+        # update degree of entities
         updateDegree(degrees, relation)
         row = row + 1
         # write name
@@ -170,15 +182,18 @@ def getMeta():
         excelsheet.write(row, 2, record_cnt)
         # write propotion
         excelsheet.write(row, 3, relation.totalRecords() / total_records)
+        # TODO:only consider type date integer, other situation is not considered
         # check if it is property
-        property = checkProperty(relation, integers, types, map)
+        property = checkProperty(relation, integers, types, map, index)
         if(property == True):
             excelsheet.write(row, 4, "true")
         else:
             excelsheet.write(row, 4, "false")        
         # extract reified info
         # TODO: reified num may be indetectable in some kb
-        is_reified = checkReified(relation, integers, map)
+        is_reified = False
+        if index == 1:
+            is_reified = checkReified(relation, integers, map)
         if(is_reified):
             excelsheet.write(row, 5, "true")
         else:
@@ -261,4 +276,11 @@ def isdigit(str):
     return False
 
 if __name__ == '__main__':
-    getMeta()
+    parser = argparse.ArgumentParser(description='arguments')
+    parser.add_argument('--name','-n',type=str, required=True, help="the name of dataset")
+    parser.add_argument('--path','-p',type=str, required=True, help='relative or absolute path of dataset (in numeratedkb pattern)')
+    parser.add_argument('--index','-i',type=int, required=True, help="0: dataset not support reified, 1: dataset support reified")
+    parser.add_argument('--indexmode','-m',type=int, default=0, help="index mode:0: ~index, 1: index")
+    parser.add_argument('--indexpath','-ipath',type=str, help="index/~index should be prehandled and stored in a file")
+    args = parser.parse_args()
+    getMeta(args.name, args.path, args.indexmode, args.index, args.indexpath)

@@ -6,15 +6,26 @@ So in order to save limited memory resource, I just store integers which are not
 encounter an integer, we just need to check if it is in this set. If not, it is an index.
 """
 
-import sys
-sys.path.append("../../..")
-from ExtractIndexInYago import ExtractIndex
+from yago1.ExtractIndexInYago import ExtractIndex
 import os
+
+def isdigit(str):
+    try:
+        float(str)
+        return True
+    except ValueError:
+        pass
+    try:
+        import unicodedata
+        unicodedata.numeric(str)
+        return True
+    except (TypeError, ValueError):
+        pass
+    return False
 
 def ExtractIntegers(integers):
     indices = set()
     ExtractIndex(indices)
-    rpath = "../../data/yago1/relations"
     path = "../../data/yago1/yago-1.0.0-native/facts"
     dir_list = os.listdir(path)
     for dir in dir_list:
@@ -34,21 +45,23 @@ def ExtractIntegers(integers):
                     if arg1 not in indices:
                         integers.add(arg2)
                         # print(arg2)
+            f.close()
+    f = open('./index', 'w')
+    for integer in integers:
+        f.write(integer)
+        f.write('\n')
+    f.close()
+
+def ExtractIntegersFromFile(integers: set, path: str):
+    f = open(path, 'r')
+    for line in f.readlines():
+        # print(line)
+        # print(line)
+        integer = line.strip().split('\n')
+        integers.add(integer[0])
+    f.close()
 
 if __name__ == '__main__':
     integers = set()
     ExtractIntegers(integers)
 
-def isdigit(str):
-    try:
-        float(str)
-        return True
-    except ValueError:
-        pass
-    try:
-        import unicodedata
-        unicodedata.numeric(str)
-        return True
-    except (TypeError, ValueError):
-        pass
-    return False

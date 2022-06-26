@@ -1,3 +1,7 @@
+"""
+    Extract indices in yago1
+"""
+
 import os
 
 # extract index information in yago
