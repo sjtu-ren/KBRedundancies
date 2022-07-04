@@ -10,9 +10,18 @@ from time import sleep
 import xlwt
 import psutil
 import argparse
-import os
 import gc
 from glob import glob
+
+def sortRelations(relation_list: list):
+    sort_list = list()
+    for relation_path in relation_list:
+        rel_name, arity, record_cnt = parseRelFilePath(relation_path)
+        sort_list.append([record_cnt, relation_path])
+    sort_list.sort(reverse=True)
+    relation_list.clear()
+    for pair in sort_list:
+        relation_list.append(pair[1])
 
 # TODO: different kb may use different method to store type information
 def getTypes(types : set, relation : KbRelation):
@@ -113,24 +122,24 @@ def getMeta(name: str, path: str, indexmode: int, index: int, indexpath: str, ds
     # new Excel
     excel = xlwt.Workbook(encoding='utf-8')
     style4 = xlwt.XFStyle()
-    style4.num_format_str = "0.0000"
+    style4.num_format_str = "0.000E+00"
     styleComma = xlwt.XFStyle()
     styleComma.num_format_str = "#,##0"
     styleCommaWithDot = xlwt.XFStyle()
-    styleCommaWithDot.num_format_str = "#,##0.0000"
+    styleCommaWithDot.num_format_str = "0.000E+00"
     # add Excel sheet2 and title info
     excelsheet = excel.add_sheet('Relations')
     excelsheet.write(0, 0, "relation")
     excelsheet.write(0, 1, "id")
-    excelsheet.write(0, 2, "#instances")
+    excelsheet.write(0, 2, "#inst")
     excelsheet.write(0, 3, "prop. (%)")
     excelsheet.write(0, 4, "property")
     excelsheet.write(0, 5, "reified")
-    excelsheet.write(0, 6, "#entities")
-    excelsheet.write(0, 7, "#subjects")
-    excelsheet.write(0, 8, "#objects")
-    excelsheet.write(0, 9, "functionality")
-    excelsheet.write(0, 10, "symmetricity")
+    excelsheet.write(0, 6, "#ent.")
+    excelsheet.write(0, 7, "#sub.")
+    excelsheet.write(0, 8, "#obj.")
+    excelsheet.write(0, 9, "functionality (%)")
+    excelsheet.write(0, 10, "symmetry (%)")
     print(path)
     map = NumerationMap(path)
     mem = psutil.virtual_memory()
@@ -175,6 +184,7 @@ def getMeta(name: str, path: str, indexmode: int, index: int, indexpath: str, ds
         if rel_name == "type":
             relation = KbRelation(rel_name, num, arity, record_cnt, path)
             getTypes(types, relation)
+    sortRelations(relation_list)
     for relation_path in relation_list:
         mem = psutil.virtual_memory()
         used = mem.free / 1024 / 1024 / 1024
@@ -240,10 +250,10 @@ def getMeta(name: str, path: str, indexmode: int, index: int, indexpath: str, ds
     # add Excel sheet1 and title info
     excelsheet = excel.add_sheet('Overview')
     excelsheet.write(0, 0, "KB")
-    excelsheet.write(0, 1, "#relations")
-    excelsheet.write(0, 2, "#entities")
-    excelsheet.write(0, 3, "#classes")
-    excelsheet.write(0, 4, "avg. degr.")
+    excelsheet.write(0, 1, "#rel.")
+    excelsheet.write(0, 2, "#ent.")
+    excelsheet.write(0, 3, "#cls.")
+    excelsheet.write(0, 4, "avg. dgr.")
     excelsheet.write(1, 0, name)
     excelsheet.write(1, 1, relation_num, styleComma)
     excelsheet.write(1, 2, entity_num, styleComma)
